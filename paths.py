@@ -6,20 +6,48 @@ from pathlib import Path
 CODE_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = CODE_DIR.parent
 
-OSM_FILE = (
+
+# Load .env without overriding variables already set by the debugger or shell.
+def _load_dotenv(env_path):
+    if not env_path.is_file():
+        return
+    for raw_line in env_path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip()
+        value = value.strip()
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in {'"', "'"}:
+            value = value[1:-1]
+        if key and value and key not in os.environ:
+            os.environ[key] = value
+
+
+def _env_path(name, default):
+    value = os.environ.get(name, "").strip()
+    return Path(value) if value else default
+
+
+_load_dotenv(CODE_DIR / ".env")
+
+OSM_FILE = _env_path(
+    "OSM_FILE",
     PROJECT_ROOT / "Initial Input Files" / "OSM_Short_Level_CSV"
-    / "Complete_OSM_Short_Level_Link_List.csv"
+    / "Complete_OSM_Short_Level_Link_List.csv",
 )
-TXDOT_FILE = (
+TXDOT_FILE = _env_path(
+    "TXDOT_FILE",
     PROJECT_ROOT / "Initial Input Files" / "TxDOT"
-    / "link_list_with_speed_NOL.csv"
+    / "link_list_with_speed_NOL.csv",
 )
-CV_FILE = (
+CV_FILE = _env_path(
+    "CV_FILE",
     PROJECT_ROOT / "Output" / "Final" / "9_20_2025"
-    / "9_20_2025_hr=19.csv"
+    / "9_20_2025_hr=19.csv",
 )
 
-OUTPUT_DIR = CODE_DIR / "Results" / "Network_MOE"
+OUTPUT_DIR = _env_path("OUTPUT_DIR", CODE_DIR / "Results" / "Network_MOE")
 FIGURE_DIR = OUTPUT_DIR / "Corridor_Figures"
 
 TXDOT_REFERENCE_FILE = OUTPUT_DIR / "txdot_speed_reference.parquet"
