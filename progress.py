@@ -3,6 +3,48 @@ import time
 import psutil
 
 
+def format_duration(seconds):
+    seconds = max(0, int(round(seconds)))
+    hours, remainder = divmod(seconds, 3600)
+    minutes, secs = divmod(remainder, 60)
+    if hours:
+        return f"{hours}h {minutes}m {secs}s"
+    if minutes:
+        return f"{minutes}m {secs}s"
+    return f"{secs}s"
+
+
+class RunClock:
+    def __init__(self):
+        self.started = time.perf_counter()
+
+    def stage(self, name):
+        return _Stage(self, name)
+
+    def summary(self):
+        total = time.perf_counter() - self.started
+        print(f"\nTotal: {format_duration(total)}")
+
+
+class _Stage:
+    def __init__(self, clock, name):
+        self.clock = clock
+        self.name = name
+        self.started = None
+        self.detail = ""
+
+    def __enter__(self):
+        self.started = time.perf_counter()
+        print(f"\n{self.name}...")
+        return self
+
+    def __exit__(self, exc_type, exc, traceback):
+        elapsed = format_duration(time.perf_counter() - self.started)
+        detail = f"{self.detail} in {elapsed}" if self.detail else elapsed
+        print(f"{self.name}: {detail}")
+        return False
+
+
 # Report elapsed time, throughput, CPU share, and memory use.
 class Progress:
     def __init__(self, label, interval_seconds=5, include_children=False):

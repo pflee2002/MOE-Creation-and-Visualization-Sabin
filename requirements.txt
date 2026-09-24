@@ -5,3 +5,4 @@ pyproj>=3.7
 pyarrow>=20
 psutil>=7.0
 matplotlib>=3.9
+psycopg2-binary>=2.9

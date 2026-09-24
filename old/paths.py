@@ -68,7 +68,7 @@ M_TO_FT = 1 / 0.3048
 
 # Define MOE and matching settings.
 SEGMENT_LENGTH_FT = 200.0
-TIME_BIN_MINUTES = 5
+TIME_BIN_MINUTES = 15
 SLOW_SPEED_THRESHOLD_MPH = 5.0
 MAX_WAYPOINT_GAP_SECONDS = 120
 MAX_TXDOT_MATCH_DISTANCE_FT = 100.0
@@ -79,9 +79,25 @@ CSV_CHUNK_SIZE = 500_000
 PARQUET_COMPRESSION = "snappy"
 REPORT_INTERVAL_SECONDS = 5
 
-# Use reusable journey partitions and a conservative process pool by default.
-JOURNEY_PARTITIONS = 32
-PARALLEL_WORKERS = min(12, os.cpu_count() or 1)
+# Read a positive integer from .env. Blank means use the computed default.
+def _env_int(name):
+    value = os.environ.get(name, "").strip()
+    if not value:
+        return None
+    number = int(value)
+    if number < 1:
+        raise ValueError(f"{name} must be at least 1")
+    return number
+
+
+# Leave PARALLEL_WORKERS blank to use every core except two.
+# Journey partitions must be at least the worker count, or those cores sit idle.
+_CPU_COUNT = os.cpu_count() or 1
+PARALLEL_WORKERS = _env_int("PARALLEL_WORKERS") or max(1, _CPU_COUNT - 2)
+JOURNEY_PARTITIONS = max(
+    _env_int("JOURNEY_PARTITIONS") or 32,
+    PARALLEL_WORKERS,
+)
 FINAL_SEGMENT_BATCH_SIZE = 100_000
 
 # Configure automatic corridor selection for visualization only.

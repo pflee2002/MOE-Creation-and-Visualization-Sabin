@@ -2,26 +2,14 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug pipeline",
+      "name": "Debug network segmenting",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/run_pipeline.py",
+      "program": "${workspaceFolder}/network_segmenting_moe_generating.py",
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "justMyCode": true,
-      "subProcess": true,
-      "envFile": "${workspaceFolder}/.env",
-      "python": "${workspaceFolder}/.venv/Scripts/python.exe"
-    },
-    {
-      "name": "Debug pipeline (check only)",
-      "type": "debugpy",
-      "request": "launch",
-      "program": "${workspaceFolder}/run_pipeline.py",
-      "args": ["--check-only"],
-      "cwd": "${workspaceFolder}",
-      "console": "integratedTerminal",
-      "justMyCode": true,
+      "subProcess": false,
       "envFile": "${workspaceFolder}/.env",
       "python": "${workspaceFolder}/.venv/Scripts/python.exe"
     },
